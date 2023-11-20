@@ -1,0 +1,29 @@
+name: ssh
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # - name: Set up JDK
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     distribution: 'zulu' # See 'Supported distributions' for available options
+      #     java-version: '17'
+          
+      # - name: NDK r25c
+      #   uses: nttld/setup-ndk@v1
+      #   id: ndk25
+      #   with:
+      #     ndk-version: r25c
+      #     add-to-path: false
+      - name: NDK 15c
+        run: |
+          mkdir -p $HOME/sdk
+          curl -L https://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip -o ndk.zip
+          unzip -q ndk.zip -d $HOME/sdk
+          # $HOME/sdk/android-ndk-r15c
+          rm ndk.zip
+      - name: Setup Debug Session
+        uses: mxschmitt/action-tmate@v3

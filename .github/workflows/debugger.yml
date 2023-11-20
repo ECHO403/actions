@@ -1,0 +1,25 @@
+name: debugger
+
+on:
+  workflow_run:
+    workflows: ["nothing here"]
+    types:
+      - completed
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Check Workflow Status
+        id: check-status
+        run: echo "::set-output name=status::${{ github.event.workflow_run.conclusion }}"
+
+      - name: Debug with VS Code
+        if: steps.check-status.outputs.status == 'failure'
+        uses: mxschmitt/action-tmate@v3
+        with:
+          config: '.github/workflows/.vscode/launch.json'  # Path to your VS Code launch configuration file

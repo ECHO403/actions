@@ -1,0 +1,132 @@
+name: openssl 1
+
+on: 
+  push:
+    tags:
+      - openssl-1*
+
+env:
+  OPENSSL_VERSION: "OpenSSL_1_1_1w"
+  NDK_VERSION: "android-ndk-r15c"
+  ANDROID_HOME: "/tmp/Android/sdk"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [arm, arm64, x86, x86_64]
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+          submodules: true
+
+    - name: install toolchain
+      run: |
+        mkdir -p $ANDROID_HOME
+        # https://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip
+        curl -L https://dl.google.com/android/repository/${NDK_VERSION}-linux-x86_64.zip -o ndk.zip
+        unzip -q ndk.zip -d $ANDROID_HOME
+        # $ANDROID_HOME/$NDK_VERSION
+        rm ndk.zip
+
+    - name: checkout openssl
+      run: |
+        git clone --recursive -b $OPENSSL_VERSION https://github.com/openssl/openssl.git
+
+    - name: build
+      run: |
+        export ANDROID_NDK_HOME=$ANDROID_HOME/$NDK_VERSION
+        cd openssl
+        arch=${{ matrix.arch }}
+        if [ "$arch" == "arm" ]; then
+          PATH=$ANDROID_NDK_HOME/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH  
+          ./Configure android-${{ matrix.arch }} -D__ANDROID_API__=14 --prefix=/opt/openssl/${{ matrix.arch }}
+        elif [ "$arch" == "arm64" ]; then
+          PATH=$ANDROID_NDK_HOME/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH  
+          ./Configure android-${{ matrix.arch }} -D__ANDROID_API__=21 --prefix=/opt/openssl/${{ matrix.arch }}
+        elif [ "$arch" == "x86" ]; then
+          PATH=$ANDROID_NDK_HOME/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH  
+          ./Configure android-${{ matrix.arch }} -D__ANDROID_API__=14 --prefix=/opt/openssl/${{ matrix.arch }}
+        elif [ "$arch" == "x86_64" ]; then
+          PATH=$ANDROID_NDK_HOME/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin:$PATH  
+          ./Configure android-${{ matrix.arch }} -D__ANDROID_API__=21 --prefix=/opt/openssl/${{ matrix.arch }}
+        fi
+        make && make install 
+        mkdir -p /tmp/openssl/${{ matrix.arch }} && mv /opt/openssl/${{ matrix.arch }}/lib/*.so /tmp/openssl/${{ matrix.arch }}/
+    
+    - name: zip artifacts
+      run: |
+        cd /tmp/openssl
+        zip -r openssl-android-${{ matrix.arch }}.zip .
+        cd -
+        mv /tmp/openssl/openssl-android-${{ matrix.arch }}.zip .
+    
+
+    - name: upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: openssl-android-${{ matrix.arch }}.zip
+        path: openssl-android-${{ matrix.arch }}.zip
+
+
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: create upload url file
+        run: |
+          echo -n "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+
+      - name: persist upload url
+        uses: actions/upload-artifact@v2
+        with:
+          name: upload_url.txt
+          path: ./upload_url.txt
+
+  release-mobile-libs:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download upload url
+        uses: actions/download-artifact@v2
+        with:
+          name: upload_url.txt
+
+      - name: get upload url
+        run: |
+          upload_url=`cat upload_url.txt`
+          echo "uploadurl=$upload_url" >> $GITHUB_ENV
+
+      - name: download asset
+        uses: actions/download-artifact@v2
+        with:
+          name: openssl-android-${{ matrix.arch }}.zip
+
+      - name: upload asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.uploadurl }}
+          asset_path: ./openssl-android-${{ matrix.arch }}.zip
+          asset_name: openssl-android-${{ matrix.arch }}.zip
+          asset_content_type: application/octet-stream

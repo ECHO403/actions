@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Debug GitHub Actions Workflow",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "restart": true,
+      "protocol": "inspector",
+      "stopOnEntry": false,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/home/runner/work/actions/actions", // Replace with your repository path
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/**/*.js"]
+    }
+  ]
+}

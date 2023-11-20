@@ -1,0 +1,115 @@
+name: openssl 1
+
+on: 
+  push:
+    tags:
+      - openssl-1*
+
+env:
+  OPENSSL_VERSION: "OpenSSL_1_1_1w"
+  NDK_VERSION: "android-ndk-r15c"
+  ANDROID_HOME: "/tmp/Android/sdk"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+          submodules: true
+
+    - name: install toolchain
+      run: |
+        mkdir -p $ANDROID_HOME
+        # https://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip
+        curl -L https://dl.google.com/android/repository/${NDK_VERSION}-linux-x86_64.zip -o ndk.zip
+        unzip -q ndk.zip -d $ANDROID_HOME
+        # $ANDROID_HOME/$NDK_VERSION
+        rm ndk.zip
+
+    - name: checkout openssl
+      run: |
+        git clone --recursive -b $OPENSSL_VERSION https://github.com/openssl/openssl.git
+
+    - name: build
+      run: |
+        bash ./openssl_1.sh
+
+    # - name: debug
+    #   uses: mxschmitt/action-tmate@v3
+
+    - name: zip artifacts
+      run: |
+        cd /tmp/openssl
+        zip -r openssl-android.zip .
+        cd -
+        mv /tmp/openssl/openssl-android.zip .
+    
+
+    - name: upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: openssl-android.zip
+        path: openssl-android.zip
+
+
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: create upload url file
+        run: |
+          echo -n "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+
+      - name: persist upload url
+        uses: actions/upload-artifact@v2
+        with:
+          name: upload_url.txt
+          path: ./upload_url.txt
+
+  publish-release:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download upload url
+        uses: actions/download-artifact@v2
+        with:
+          name: upload_url.txt
+
+      - name: get upload url
+        run: |
+          upload_url=`cat upload_url.txt`
+          echo "uploadurl=$upload_url" >> $GITHUB_ENV
+
+      - name: download asset
+        uses: actions/download-artifact@v2
+        with:
+          name: openssl-android.zip
+
+      - name: upload asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.uploadurl }}
+          asset_path: ./openssl-android.zip
+          asset_name: openssl-android.zip
+          asset_content_type: application/octet-stream
