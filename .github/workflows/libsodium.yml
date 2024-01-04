@@ -39,8 +39,8 @@ jobs:
     - name: upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: libsodium-${{ env.LIBSODIUM_VERSION }}.zip
-        path: libsodium-${{ env.LIBSODIUM_VERSION }}.zip
+        name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
+        path: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
 
 
   create-release:
@@ -90,7 +90,7 @@ jobs:
       - name: download asset
         uses: actions/download-artifact@v2
         with:
-          name: libsodium-${{ env.LIBSODIUM_VERSION }}.zip
+          name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
 
       - name: upload asset
         uses: actions/upload-release-asset@v1
@@ -98,6 +98,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.uploadurl }}
-          asset_path: libsodium-${{ env.LIBSODIUM_VERSION }}.zip
-          asset_name: libsodium-${{ env.LIBSODIUM_VERSION }}.zip
+          asset_path: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
+          asset_name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
           asset_content_type: application/octet-stream
