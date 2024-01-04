@@ -32,17 +32,9 @@ jobs:
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "ndk;${NDK_VERSION}" "platforms;android-29"
   
-    - name: checkout libsodium
-      run: |
-        git clone --recursive -b $LIBSODIUM_VERSION https://github.com/jedisct1/libsodium.git
-        
     - name: build
       run: |
         bash ./libsodium.sh
-    
-    - name: zip artifacts
-      run: |
-        mv libsodium-$LIBSODIUM_VERSION.0.aar libsodium-$LIBSODIUM_VERSION.aar 
     
     - name: upload artifacts
       uses: actions/upload-artifact@v2
