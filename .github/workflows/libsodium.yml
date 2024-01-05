@@ -1,14 +1,15 @@
-name: libsodium-include
+name: libsodium
 
 on: 
   push:
     tags:
-      - libsodium-include-1*
+      - libsodium-1*
 
 env:
   LIBSODIUM_VERSION: "1.0.19"
   NDK_VERSION: "20.0.5594570"
   ANDROID_HOME: "/tmp/Android/sdk"
+  TARGET: "libsodium-1.0.19.aar"
 
 jobs:
   build:
@@ -34,13 +35,13 @@ jobs:
   
     - name: build
       run: |
-        bash ./libsodium-include.sh
+        bash ./libsodium.sh
     
     - name: upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
-        path: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
+        name: ${{ env.TARGET }}
+        path: ${{ env.TARGET }}
 
 
   create-release:
@@ -86,18 +87,18 @@ jobs:
         run: |
           upload_url=`cat upload_url.txt`
           echo "uploadurl=$upload_url" >> $GITHUB_ENV
-          
+
       - name: download asset
         uses: actions/download-artifact@v2
         with:
-          name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
-      
+          name: ${{ env.TARGET }}
+
       - name: upload asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.uploadurl }}
-          asset_path: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
-          asset_name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
+          asset_path: ${{ env.TARGET }}
+          asset_name: ${{ env.TARGET }}
           asset_content_type: application/octet-stream

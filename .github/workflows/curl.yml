@@ -1,14 +1,15 @@
-name: libsodium
+name: curl
 
 on: 
   push:
     tags:
-      - libsodium-1*
+      - curl-8*
 
 env:
-  LIBSODIUM_VERSION: "1.0.19"
+  CURL_VERSION: "curl-8_5_0"
   NDK_VERSION: "20.0.5594570"
   ANDROID_HOME: "/tmp/Android/sdk"
+  TARGET: "curl-8.5.0.zip"
 
 jobs:
   build:
@@ -32,15 +33,27 @@ jobs:
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "ndk;${NDK_VERSION}" "platforms;android-29"
   
+    - name: checkout curl
+      run: |
+        git clone --recursive -b $CURL_VERSION https://github.com/curl/curl.git
+        
     - name: build
       run: |
-        bash ./libsodium.sh
+        bash ./curl_8.sh
     
+    - name: zip artifacts
+      run: |
+        cd /tmp/curl
+        zip -r ${{ env.TARGET }} .
+        cd -
+        mv /tmp/curl/${{ env.TARGET }} .
+    
+
     - name: upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
-        path: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
+        name: ${{ env.TARGET }}
+        path: ${{ env.TARGET }}
 
 
   create-release:
@@ -90,7 +103,7 @@ jobs:
       - name: download asset
         uses: actions/download-artifact@v2
         with:
-          name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
+          name: ${{ env.TARGET }}
 
       - name: upload asset
         uses: actions/upload-release-asset@v1
@@ -98,6 +111,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.uploadurl }}
-          asset_path: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
-          asset_name: libsodium-${{ env.LIBSODIUM_VERSION }}.aar
+          asset_path: ./${{ env.TARGET }}
+          asset_name: ${{ env.TARGET }}
           asset_content_type: application/octet-stream

@@ -1,15 +1,15 @@
-name: curl 8
+name: libsodium-include
 
 on: 
   push:
     tags:
-      - curl-8*
+      - libsodium-include-1*
 
 env:
-  CURL_VERSION: "curl-8_5_0"
+  LIBSODIUM_VERSION: "1.0.19"
   NDK_VERSION: "20.0.5594570"
   ANDROID_HOME: "/tmp/Android/sdk"
-  TARGET: "curl-android.zip"
+  TARGET: "libsodium-include-1.0.19.zip"
 
 jobs:
   build:
@@ -33,22 +33,10 @@ jobs:
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "ndk;${NDK_VERSION}" "platforms;android-29"
   
-    - name: checkout curl
-      run: |
-        git clone --recursive -b $CURL_VERSION https://github.com/curl/curl.git
-        
     - name: build
       run: |
-        bash ./curl_8.sh
+        bash ./libsodium-include.sh
     
-    - name: zip artifacts
-      run: |
-        cd /tmp/curl
-        zip -r ${{ env.TARGET }} .
-        cd -
-        mv /tmp/curl/${{ env.TARGET }} .
-    
-
     - name: upload artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -99,18 +87,18 @@ jobs:
         run: |
           upload_url=`cat upload_url.txt`
           echo "uploadurl=$upload_url" >> $GITHUB_ENV
-
+          
       - name: download asset
         uses: actions/download-artifact@v2
         with:
           name: ${{ env.TARGET }}
-
+      
       - name: upload asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.uploadurl }}
-          asset_path: ./${{ env.TARGET }}
+          asset_path: ${{ env.TARGET }}
           asset_name: ${{ env.TARGET }}
           asset_content_type: application/octet-stream
