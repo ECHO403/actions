@@ -94,7 +94,7 @@ if [ $? -eq 0 ]; then
   if [ -f "$LIBSODIUM_TARGET" ]; then
     rm $LIBSODIUM_TARGET
   fi
-  zip -rX "$LIBSODIUM_TARGET" "libsodium-include"
+  zip -rX "$LIBSODIUM_TARGET" "sodium_include"
   printf 'All of static libs has been zipped into %s.\n' "$LIBSODIUM_TARGET"
   rm -rf "$TEMP_DIR"
 fi
