@@ -1,0 +1,116 @@
+name: curl 8
+
+on: 
+  push:
+    tags:
+      - curl-8*
+
+env:
+  CURL_VERSION: "curl-8_5_0"
+  NDK_VERSION: "25.1.8937393"
+  ANDROID_HOME: "/tmp/Android/sdk"
+  TARGET: "${{ env.TARGET }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+          submodules: true
+
+    - name: install toolchain
+      run: |
+        apt update && apt install -y make llvm-dev libclang-dev clang pkg-config unzip curl default-jdk build-essential
+        export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
+        cd /tmp/
+        curl -OL https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+        unzip commandlinetools-linux-6858069_latest.zip
+        mkdir -p $ANDROID_HOME
+        mv cmdline-tools $ANDROID_HOME
+        yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
+        sdkmanager --sdk_root=$ANDROID_HOME "ndk;${NDK_VERSION}" "platforms;android-29"
+  
+    - name: checkout curl
+      run: |
+        git clone --recursive -b $CURL_VERSION https://github.com/curl/curl.git
+        
+    - name: build
+      run: |
+        bash ./curl_8.sh
+    
+    - name: zip artifacts
+      run: |
+        cd /tmp/curl
+        zip -r ${{ env.TARGET }} .
+        cd -
+        mv /tmp/curl/${{ env.TARGET }} .
+    
+
+    - name: upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.TARGET }}
+        path: ${{ env.TARGET }}
+
+
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: create upload url file
+        run: |
+          echo -n "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+
+      - name: persist upload url
+        uses: actions/upload-artifact@v2
+        with:
+          name: upload_url.txt
+          path: ./upload_url.txt
+
+  publish-release:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download upload url
+        uses: actions/download-artifact@v2
+        with:
+          name: upload_url.txt
+
+      - name: get upload url
+        run: |
+          upload_url=`cat upload_url.txt`
+          echo "uploadurl=$upload_url" >> $GITHUB_ENV
+
+      - name: download asset
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.TARGET }}
+
+      - name: upload asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.uploadurl }}
+          asset_path: ./${{ env.TARGET }}
+          asset_name: ${{ env.TARGET }}
+          asset_content_type: application/octet-stream
