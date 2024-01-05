@@ -1,5 +1,7 @@
 #!/usr/bin/env bash 
 
+export ANDROID_NDK_HOME=$ANDROID_HOME/$NDK_VERSION
+
 ACTIONDIR=$(pwd)
 
 cd jsoncpp || exit
