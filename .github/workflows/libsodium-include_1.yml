@@ -42,7 +42,7 @@ jobs:
         name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
         path: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
     - name: Setup Debug Session
-        uses: mxschmitt/action-tmate@v3
+      uses: mxschmitt/action-tmate@v3
 
 
   create-release:
