@@ -9,7 +9,7 @@ env:
   CURL_VERSION: "curl-8_5_0"
   NDK_VERSION: "25.1.8937393"
   ANDROID_HOME: "/tmp/Android/sdk"
-  TARGET: "${{ env.TARGET }}"
+  TARGET: "curl-android.zip"
 
 jobs:
   build:
