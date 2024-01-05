@@ -35,9 +35,9 @@ build_x86_64() {
 
 # Execute builds for different architectures
 export ANDROID_NDK_HOME=$ANDROID_HOME/$NDK_VERSION
-autoreconf -fi
+
 mkdir -p /tmp/curl 
-cd curl
+cd curl && autoreconf -fi
 build_x86
 # build_arm
 # build_arm64
