@@ -92,7 +92,8 @@ if [ $? -eq 0 ]; then
   fi
   zip -rX $LIBSODIUM_TARGET "$SODIUM_INCLUDE_DIR"
   printf 'All of static libs has been moved into %s.\n' "$SODIUM_INCLUDE_DIR"
-  # rm -rf "$TEMP_DIR"
+  rm -rf "$TEMP_DIR"
 fi
 
+cd $BASEDIR
 
