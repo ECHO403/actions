@@ -27,7 +27,8 @@ jobs:
       #     rm ndk.zip
       - name: NDK r20b
         run: |
-          export NDK_VERSION=20.0.5594570
+          export ANDROID_HOME="/tmp/Android/sdk"
+          export NDK_VERSION="20.0.5594570"
           apt update && apt install -y make llvm-dev libclang-dev clang pkg-config unzip curl default-jdk build-essential
           export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
           cd /tmp/
