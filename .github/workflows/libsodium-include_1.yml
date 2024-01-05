@@ -90,7 +90,7 @@ jobs:
       - name: download asset
         uses: actions/download-artifact@v2
         with:
-          name: libsodium--include-${{ env.LIBSODIUM_VERSION }}.zip
+          name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
 
       - name: upload asset
         uses: actions/upload-release-asset@v1
