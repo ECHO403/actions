@@ -13,6 +13,8 @@ LIBSODIUM_GIT_TAG=1.0.19 # it is the last stable version that I have tested.
 
 set -e
 
+ACTIONDIR=$(pwd)
+
 ## to redirect directory.
 BASEDIR=$(dirname $0)
 cd $BASEDIR
@@ -84,16 +86,16 @@ else
  echo "build-libsodium: skipping x86_64, already built!"
 fi
 
-LIBSODIUM_TARGET=$BASEDIR/libsodium-include-$LIBSODIUM_GIT_TAG.zip
+LIBSODIUM_TARGET=$ACTIONDIR/libsodium-include-$LIBSODIUM_GIT_TAG.zip
 if [ $? -eq 0 ]; then
   mv -v "$SODIUM_CLONING_HOME"/libsodium-android-* "$SODIUM_INCLUDE_DIR"
+  printf 'All of static libs has been moved into %s.\n' "$SODIUM_INCLUDE_DIR"
   if [ -f "$LIBSODIUM_TARGET" ]; then
     rm $LIBSODIUM_TARGET
   fi
   zip -rX $LIBSODIUM_TARGET "$SODIUM_INCLUDE_DIR"
-  printf 'All of static libs has been moved into %s.\n' "$SODIUM_INCLUDE_DIR"
+  printf 'All of static libs has been zipped into %s.\n' "$LIBSODIUM_TARGET"
   rm -rf "$TEMP_DIR"
 fi
 
-cd $BASEDIR
 
