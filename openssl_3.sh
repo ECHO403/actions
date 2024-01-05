@@ -5,7 +5,7 @@ build_openssl() {
   PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/${arch}-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH  
   ./Configure android-${arch} -D__ANDROID_API__=29 --prefix=/opt/openssl/${arch}
   make && make install 
-  mkdir -p /tmp/openssl/${arch} && mv /opt/openssl/${arch}/lib/lib* /tmp/openssl/${arch}/
+  mkdir -p /tmp/openssl/${arch} && mv /opt/openssl/${arch}/* /tmp/openssl/${arch}/
   make clean
 }
 
