@@ -7,7 +7,7 @@ on:
 
 env:
   CURL_VERSION: "curl-8_5_0"
-  NDK_VERSION: "25.1.8937393"
+  NDK_VERSION: "20.0.5594570"
   ANDROID_HOME: "/tmp/Android/sdk"
   TARGET: "curl-android.zip"
 
