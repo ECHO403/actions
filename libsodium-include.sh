@@ -90,10 +90,11 @@ LIBSODIUM_TARGET=libsodium-include-$LIBSODIUM_GIT_TAG.zip
 if [ $? -eq 0 ]; then
   mv -v "$SODIUM_CLONING_HOME"/libsodium-android-* "$SODIUM_INCLUDE_DIR"
   printf 'All of static libs has been moved into %s.\n' "$SODIUM_INCLUDE_DIR"
+  cd $ACTIONDIR
   if [ -f "$LIBSODIUM_TARGET" ]; then
     rm $LIBSODIUM_TARGET
   fi
-  cd $ACTIONDIR && zip -rX "$LIBSODIUM_TARGET" "$SODIUM_INCLUDE_DIR"
+  zip -rX "$LIBSODIUM_TARGET" libsodium-include
   printf 'All of static libs has been zipped into %s.\n' "$LIBSODIUM_TARGET"
   rm -rf "$TEMP_DIR"
 fi
