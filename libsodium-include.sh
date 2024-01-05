@@ -38,7 +38,7 @@ mkdir "$TEMP_DIR"
 
 SODIUM_CLONING_HOME=$TEMP_DIR/libsodium
 # clone
-git clone git@github.com:jedisct1/libsodium.git "$SODIUM_CLONING_HOME"
+git clone https://github.com/jedisct1/libsodium.git "$SODIUM_CLONING_HOME"
 cd "$SODIUM_CLONING_HOME" || exit
 git fetch --tags
 git checkout $LIBSODIUM_GIT_TAG # check specific verion.
