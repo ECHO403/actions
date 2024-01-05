@@ -12,12 +12,12 @@ jobs:
       #     distribution: 'zulu' # See 'Supported distributions' for available options
       #     java-version: '17'
           
-      - name: NDK r25c
-        uses: nttld/setup-ndk@v1
-        id: ndk25
-        with:
-          ndk-version: r25c
-          add-to-path: true
+      # - name: NDK r25c
+      #   uses: nttld/setup-ndk@v1
+      #   id: ndk25
+      #   with:
+      #     ndk-version: r25c
+      #     add-to-path: true
       # - name: NDK 15c
       #   run: |
       #     mkdir -p $HOME/sdk
@@ -25,5 +25,18 @@ jobs:
       #     unzip -q ndk.zip -d $HOME/sdk
       #     # $HOME/sdk/android-ndk-r15c
       #     rm ndk.zip
+      - name: NDK r20b
+        run: |
+          export NDK_VERSION=20.0.5594570
+          apt update && apt install -y make llvm-dev libclang-dev clang pkg-config unzip curl default-jdk build-essential
+          export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
+          cd /tmp/
+          curl -OL https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+          unzip commandlinetools-linux-6858069_latest.zip
+          mkdir -p $ANDROID_HOME
+          mv cmdline-tools $ANDROID_HOME
+          yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
+          sdkmanager --sdk_root=$ANDROID_HOME "ndk;${NDK_VERSION}" "platforms;android-29"
+
       - name: Setup Debug Session
         uses: mxschmitt/action-tmate@v3
