@@ -1,6 +1,7 @@
 #!/usr/bin/env bash 
 
 export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$NDK_VERSION
+export PATH=$ANDROID_NDK_ROOT:$PATH
 
 ACTIONDIR=$(pwd)
 
