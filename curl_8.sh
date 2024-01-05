@@ -24,8 +24,8 @@ build_arm() {
 build_arm64() {
   arch="arm64"
   PATH=$ANDROID_NDK_HOME/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin:$PATH  
-  ./configure --host aarch64-linux-android --with-pic --with-openssl --prefix=/tmp/curl/${arch}
-  make && make install 
+  # ./configure --host aarch64-linux-android --with-pic --with-openssl --prefix=/tmp/curl/${arch}
+  # make && make install 
   ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl --prefix=/tmp/curl/${arch}
   make && make install 
   make clean
@@ -46,8 +46,8 @@ export ANDROID_NDK_HOME=$ANDROID_HOME/$NDK_VERSION
 
 mkdir -p /tmp/curl 
 cd curl && autoreconf -fi
-build_x86
+# build_x86
 # build_arm
-# build_arm64
+build_arm64
 # build_x86_64
 
