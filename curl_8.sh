@@ -4,8 +4,8 @@
 build_x86() {
   arch="x86"
   PATH=$ANDROID_NDK_HOME/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH  
-  ./configure --host x86 --with-pic --with-openssl --prefix=/tmp/curl/${arch}
-  make && make install 
+  # ./configure --host x86 --with-pic --with-openssl --prefix=/tmp/curl/${arch}
+  # make && make install 
   ./configure --host x86 --with-pic --with-openssl --disable-shared --prefix=/tmp/curl/${arch}
   make && make install 
   make clean
