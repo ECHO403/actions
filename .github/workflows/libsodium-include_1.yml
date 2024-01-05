@@ -41,8 +41,6 @@ jobs:
       with:
         name: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
         path: libsodium-include-${{ env.LIBSODIUM_VERSION }}.zip
-    - name: Setup Debug Session
-      uses: mxschmitt/action-tmate@v3
 
 
   create-release:
@@ -88,8 +86,7 @@ jobs:
         run: |
           upload_url=`cat upload_url.txt`
           echo "uploadurl=$upload_url" >> $GITHUB_ENV
-      - name: Setup Debug Session
-        uses: mxschmitt/action-tmate@v3
+          
       - name: download asset
         uses: actions/download-artifact@v2
         with:
