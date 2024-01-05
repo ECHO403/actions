@@ -90,7 +90,8 @@ if [ $? -eq 0 ]; then
   rm -rf "$TEMP_DIR"
 fi
 
-if [ -f "libsodium-include.zip" ]; then
-  rm libsodium-include.zip
+LIBSODIUM_TARGET=$BASEDIR/libsodium-include-$LIBSODIUM_GIT_TAG.zip
+if [ -f "$LIBSODIUM_TARGET" ]; then
+  rm $LIBSODIUM_TARGET
 fi
-zip -rX libsodium-include-$LIBSODIUM_GIT_TAG.zip "$SODIUM_INCLUDE_DIR"
+zip -rX $LIBSODIUM_TARGET "$SODIUM_INCLUDE_DIR"
